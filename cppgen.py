@@ -23,7 +23,6 @@ def find_enum_constants(nodes: typing.Iterable[clang.cindex.Cursor]):
 find_enums(tu.cursor.get_children())
 
 for i in enums:
-	print(i[1],'\n')
-		
+	print(i[1],'\n')		
 
 print("End of script")

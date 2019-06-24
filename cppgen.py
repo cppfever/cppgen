@@ -5,7 +5,7 @@ index = clang.cindex.Index.create()
 tu = index.parse('SDL2/include/SDL_keycode.h', args=['-std=c++17'])
 
 enums = []
-enums_count = 0
+enums_count = 0#for anonimouse enums
 
 def find_enums(nodes: typing.Iterable[clang.cindex.Cursor]):
     for i in nodes:

@@ -65,35 +65,85 @@ replace_prefix(enums[3], 'SDLK_', 'KeyCode')
 replace_prefix(enums[4], 'KMOD_', 'KeyMode')
 
 #print_enums()
-#print_new_enums()
+print_new_enums()
 
-def generate_new_enums():
-	for i in new_enums[1]:
-		new_enums[-1].append(s)
+# def generate_new_enums():
+# 	for i in new_enums[1]:
+# 		new_enums[-1].append(s)
 
 print('End of script')
 
 
-# C++ generator
-
-class Generator:
-	class EmptyGenerator:
+# C++ generators
+class Generator:	
+	tablevel: int = 0
+	tabsize: int = 4
+	
+	def __init__(self, *generators):
+		self.generators = generators				
+	
+	def format(self) -> str:
 		pass
-	empty = EmptyGenerator()
-	def __init__(self, *args):
-		self.list = args
 
-class TranslationUnit(Generator):
-	def __init__(self, file_name: str, *args):
-		Generator.__init__(self, args)
-		self.file_name = file_name
+
+class TranslationUnit(Generator):		
+	def __init__(self, *generators):
+		Generator.__init__(self, generators)
+		self.result: str = self.format()
+
+	def format(self) -> str:
+		s: str = ''
+		for gs in self.generators:
+			for g in gs:
+				s = s + g.format()
+		return s
+
+	def save(self, file_name: str):
+		file = open(file_name, 'w')
+		file.write(self.result)
+		file.close()
+
+
+class Namespace(Generator):
+
+	def __init__(self, name: str, *generators):
+		Generator.__init__(self, generators)
+		self.name = name
+
+	def format(self) -> str:
+		s: str = 'namespace ' + self.name +'\n{\n'
+		for gs in self.generators:
+			for g in gs:
+				s += g.format()
+		s += '\n}\\\\namespace ' + self.name
+		return s
+
+class Block(Generator):
+
+	def __init__(self, *generators):
+		Generator.__init__(self, generators)
+		self.result: str
 
 class Enum(Generator):
-	def __init__(self, name: str, *args):
-		Generator.__init__(self, args)
-		self.file_name = file_name
 
-g = Generator(
-		Generator(),
-		TranslationUnit('keys.hpp', 
-			Generator()))
+	def __init__(self, name: str, consts: [str]):
+		Generator.__init__(self)
+		self.name = name
+		self.result: str
+		self.consts = consts		
+
+	def format(self) -> str:
+		s: str = 'enum class ' + self.name +'\n{\n'
+		for c in self.consts:
+			s += c + ',' + '\n'
+		s += '\n}\\\\enum class ' + self.name
+		return s
+
+
+tu = TranslationUnit(
+	Namespace('vgui',
+		Enum(new_enums[2][0], new_enums[2])))
+print(tu.format())
+tu.save('keys.hpp')
+
+
